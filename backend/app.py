@@ -2,6 +2,9 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from database import search_first_aid, get_shelters, get_evacuation, create_tables
 from ai_service import get_ai_response, check_ollama_running, list_available_models
+from map_service import generate_shelter_map, generate_evacuation_map, get_map_path
+
+from translator_service import translate_text, translate_emergency_response, get_installed_languages
 
 app = Flask(__name__)
 CORS(app)  # allow Flutter app to make requests from any origin
@@ -82,7 +85,18 @@ def shelters():
 def evacuation():
     disaster_type = request.args.get('type', 'flood').strip()
     language      = request.args.get('lang', 'en').strip()
-    results       = get_evacuation(disaster_type, language)
+    results       = get_evacuation(disaster_type, 'en')
+
+    if language != 'en':
+        try:
+            for item in results:
+                translated = translate_text(item['instructions'], 'en', language)
+                if translated['success']:
+                    item['instructions'] = translated['translated']
+        except Exception:
+            pass  # Return English if translation fails
+
+
     return jsonify({'instructions': results, 'count': len(results)})
 
 # ─────────────────────────────────────────────────────
@@ -93,58 +107,74 @@ def evacuation():
 @app.route('/ask', methods=['POST'])
 def ask():
     data = request.get_json()
-
+    
     if not data or 'query' not in data:
-        return jsonify({'error': 'JSON body with query field is required'}), 400
+
+        return jsonify({'error': 'query field is required'}), 400
 
     query    = data.get('query', '').strip()
-    mode     = data.get('mode', 'general').strip()
-    language = data.get('lang', 'en').strip()
-    city     = data.get('city', 'Solapur').strip()
+    mode     = data.get('mode', 'general')
+    language = data.get('lang', 'en')
 
-    response_data = {
-        'query':     query,
-        'mode':      mode,
-        'answer':    '',
-        'source':    '',
-        'shelters':  [],
+    city     = data.get('city', 'Solapur')
+
+    result = {
+        'query':      query,
+        'mode':       mode,
+        'answer':     '',
+        'source':     '',        # 'database' or 'ai_model'
+        'confidence': '',        # 'high' or 'medium'
+
+        'shelters':   [],
         'evacuation': []
     }
 
-    # ── Step 1: Search SQLite database first (fastest, no AI needed) ──
+
+    # ── Step 1: Search SQLite DB first ──
     db_results = search_first_aid(query, language)
     if db_results:
-        response_data['answer']  = db_results[0]['steps']
-        response_data['source']  = 'database'
+        result['answer']     = db_results[0]['steps']
+        result['source']     = 'database'
 
-    # ── Step 2: Add evacuation info for disaster modes ──
+        result['confidence'] = 'high'   # verified data
+
+
+    # ── Step 2: Disaster mode extras ──
     if mode in ['flood', 'fire', 'earthquake']:
         evac = get_evacuation(mode, language)
         if evac:
-            response_data['evacuation'] = evac
-            if not response_data['answer']:
-                response_data['answer'] = evac[0]['instructions']
-                response_data['source'] = 'database'
+            result['evacuation'] = evac
+            if not result['answer']:
+                result['answer']     = evac[0]['instructions']
+                result['source']     = 'database'
+                result['confidence'] = 'high'
 
-        # Also attach nearby shelters
-        shelter_list = get_shelters(city)
-        response_data['shelters'] = shelter_list
+        result['shelters'] = get_shelters(city)
 
-    # ── Step 3: If nothing found in DB, use AI model ──
-    if not response_data['answer']:
+    # ── Step 3: Not in DB — ask Ollama AI ──
+    # This handles ANY question the user asks, even outside the DB
+
+    if not result['answer']:
         ai_result = get_ai_response(query, mode)
         if ai_result['success']:
-            response_data['answer'] = ai_result['answer']
-            response_data['source'] = 'ai_model'
-        else:
-            response_data['answer'] = (
-                'Could not get a response. '
-                'Make sure Ollama is running: ollama serve\n\n'
-                f'Error: {ai_result["error"]}'
-            )
-            response_data['source'] = 'error'
+            result['answer']     = ai_result['answer']
+            result['source']     = 'ai_model'
 
-    return jsonify(response_data)
+            result['confidence'] = 'medium'  # AI-generated, not verified
+        else:
+            result['answer'] = (
+                'Could not get a response.\n\n'
+                'Please make sure:\n'
+                '1. Ollama is running: ollama serve\n'
+
+                f'2. Error: {ai_result["error"]}'
+            )
+            result['source']     = 'error'
+
+            result['confidence'] = 'none'
+
+
+    return jsonify(result)
 
 # ─────────────────────────────────────────────────────
 # ROUTE 6: Direct AI query (bypass DB)
@@ -159,8 +189,170 @@ def ai_only():
 
     query  = data.get('query', '')
     mode   = data.get('mode', 'general')
+
+    if not check_ollama_running():
+        return jsonify({
+            'success': False,
+            'answer': 'AI assistant is offline. Start Ollama with: ollama serve',
+            'source': 'offline'
+        })
+
+
     result = get_ai_response(query, mode)
     return jsonify(result)
+
+
+# ─────────────────────────────────────────────────────
+# ROUTE 7: Generate offline shelter map
+# GET /map?type=flood&city=Solapur
+# ─────────────────────────────────────────────────────
+@app.route('/map', methods=['GET'])
+def get_map():
+    disaster_type = request.args.get('type', 'general')
+    city          = request.args.get('city', 'Solapur')
+
+    # Get shelters from DB
+    shelters = get_shelters(city)
+
+    if not shelters:
+        return jsonify({'error': 'No shelters found for this city'}), 404
+
+    # Generate the map HTML
+    map_path = generate_shelter_map(shelters, disaster_type)
+
+    if map_path:
+        # Return the HTML file directly — Flutter will open it in WebView
+        from flask import send_file
+        return send_file(map_path, mimetype='text/html')
+
+    return jsonify({'error': 'Could not generate map'}), 500
+
+
+# ─────────────────────────────────────────────────────
+# ROUTE 8: Generate evacuation route map
+# GET /evacmap?type=flood&city=Solapur&lat=17.68&lng=75.90
+# ─────────────────────────────────────────────────────
+@app.route('/evacmap', methods=['GET'])
+def get_evac_map():
+    disaster_type = request.args.get('type', 'flood')
+    city          = request.args.get('city', 'Solapur')
+    user_lat      = float(request.args.get('lat', 17.6805))
+    user_lng      = float(request.args.get('lng', 75.9064))
+
+    shelters = get_shelters(city)
+
+    if not shelters:
+        return jsonify({'error': 'No shelters found'}), 404
+
+    map_path = generate_evacuation_map(shelters, disaster_type, user_lat, user_lng)
+
+    if map_path:
+        from flask import send_file
+        return send_file(map_path, mimetype='text/html')
+
+    return jsonify({'error': 'Could not generate evacuation map'}), 500
+
+
+# ─────────────────────────────────────────────────────
+# ROUTE 9: Translate any text offline
+# POST /translate
+# Body: { "text": "...", "from": "en", "to": "hi" }
+# ─────────────────────────────────────────────────────
+@app.route('/translate', methods=['POST'])
+def translate():
+    data = request.get_json()
+
+    if not data or 'text' not in data:
+        return jsonify({'error': 'text field is required'}), 400
+
+    text      = data.get('text', '')
+    from_lang = data.get('from', 'en')
+    to_lang   = data.get('to', 'hi')
+
+    if not check_ollama_running():
+        return jsonify({
+            'success': False,
+            'translated': text,
+            'from': from_lang,
+            'to': to_lang,
+            'error': 'Translation offline. Start Ollama with: ollama serve'
+        })
+
+    result = translate_text(text, from_lang, to_lang)
+    return jsonify(result)
+
+
+# ─────────────────────────────────────────────────────
+# ROUTE 10: Auto-translate emergency response
+# POST /ask_translated
+# Body: { "query": "...", "mode": "...", "lang": "hi" }
+# Same as /ask but auto-translates response to target lang
+# ─────────────────────────────────────────────────────
+@app.route('/ask_translated', methods=['POST'])
+def ask_translated():
+    data = request.get_json()
+
+    if not data or 'query' not in data:
+        return jsonify({'error': 'query field is required'}), 400
+
+    query    = data.get('query', '').strip()
+    mode     = data.get('mode', 'general')
+    lang     = data.get('lang', 'en')
+    city     = data.get('city', 'Solapur')
+    
+    ollama_online = check_ollama_running()
+
+      # Step 1: If query is in Hindi/Marathi, translate to English first
+    query_in_english = query
+    if lang != 'en' and ollama_online:
+        translated_query = translate_text(query, lang, 'en')
+        if translated_query['success']:
+            query_in_english = translated_query['translated']
+    # Step 2: Get emergency response (always in English from DB/AI)
+    from database import search_first_aid, get_shelters, get_evacuation
+    from ai_service import get_ai_response
+
+    answer = ''
+    source = ''
+
+    db_results = search_first_aid(query_in_english, 'en')
+    if db_results:
+        answer = db_results[0]['steps']
+        source = 'database'
+    else:
+        ai_result = get_ai_response(query_in_english, mode)
+        if ai_result['success']:
+            answer = ai_result['answer']
+            source = 'ai_model'
+
+   # Step 3: Translate response to requested language
+    translated_answer = answer
+    if lang != 'en' and answer and ollama_online:
+        translated_answer = translate_emergency_response(answer, lang)
+        
+    shelters = get_shelters(city) if mode in ['flood', 'fire', 'earthquake'] else []
+
+    return jsonify({
+        'query':              query,
+        'query_in_english':   query_in_english,
+        'answer':             translated_answer,
+        'answer_in_english':  answer,
+        'source':             source,
+        'lang':               lang,
+        'shelters':           shelters
+    })
+
+
+# ─────────────────────────────────────────────────────
+# ROUTE 11: List installed translation languages
+# GET /languages
+# ─────────────────────────────────────────────────────
+@app.route('/languages', methods=['GET'])
+def languages():
+    return jsonify({'installed_pairs': get_installed_languages()})
+
+
+
 
 # ─────────────────────────────────────────────────────
 # START SERVER

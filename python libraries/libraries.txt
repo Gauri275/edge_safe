@@ -1,0 +1,5 @@
+pip install fastapi uvicorn ollama
+pip install flask flask-cors requests
+
+for map
+pip install folium staticmap requests pillow
