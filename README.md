@@ -1,0 +1,1 @@
+Edge-Safe is an offline emergency assistant software that provides critical information like medical guidance and evacuation help without requiring internet connectivity. It runs locally on devices such as smartphones or laptops using optimized AI models.
