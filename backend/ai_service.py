@@ -46,25 +46,20 @@ def get_ai_response(query: str, mode: str = 'general') -> dict:
         return {
             'success': False,
             'answer':  '',
-            'error':   'Ollama is not running. Start it with: ollama serve'
+            'error':   'Ollama not running. Start with: ollama serve'
         }
 
-    mode_extra   = MODE_EXTRAS.get(mode, MODE_EXTRAS['general'])
-    full_prompt  = (
-        f"{MASTER_PROMPT}\n\n"
-        f"Context: {mode_extra}\n\n"
-        f"Emergency question: {query}\n\n"
-        f"Answer:"
-    )
+    # Simple short prompt — tinyllama works better with short prompts
+    prompt = f"First aid steps for: {query}\nGive 5 numbered steps only:"
 
     payload = {
         'model':   MODEL_NAME,
-        'prompt':  full_prompt,
+        'prompt':  prompt,
         'stream':  False,
         'options': {
-            'temperature': 0.2,   # low = more factual
-            'num_predict': 400,   # enough for 8 detailed steps
-            'top_p':       0.9,
+            'temperature': 0.1,
+            'num_predict': 250,
+            'stop': ['\n\n\n', 'User:', 'Context:', 'Rules:']
         }
     }
 
@@ -74,14 +69,38 @@ def get_ai_response(query: str, mode: str = 'general') -> dict:
             json=payload,
             timeout=30
         )
+
         if response.status_code == 200:
             data   = response.json()
             answer = data.get('response', '').strip()
+
+            # Clean up prompt leakage — remove if tinyllama repeats instructions
+            cutoff_phrases = [
+                'Context:', 'Rules:', 'Note:', 'Edge-Safe:',
+                'Be calm', 'User:', 'Assistant:', 'Translate',
+                'Sure! Here', 'Here is', 'Here are'
+            ]
+            for phrase in cutoff_phrases:
+                if phrase in answer:
+                    answer = answer[:answer.index(phrase)].strip()
+
+            # If answer is too short after cleanup use fallback message
+            if len(answer) < 20:
+                answer = (
+                    'Please follow these general steps:\n'
+                    '1. Stay calm and assess the situation.\n'
+                    '2. Call emergency services if available.\n'
+                    '3. Keep the person still and comfortable.\n'
+                    '4. Do not give food or water.\n'
+                    '5. Wait for professional help to arrive.'
+                )
+
             return {
                 'success': True,
                 'answer':  answer,
                 'error':   ''
             }
+
         return {
             'success': False,
             'answer':  '',

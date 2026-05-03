@@ -3,12 +3,15 @@ from flask_cors import CORS
 from database import search_first_aid, get_shelters, get_evacuation, create_tables
 from ai_service import get_ai_response, check_ollama_running, list_available_models
 from map_service import generate_shelter_map, generate_evacuation_map, get_map_path
+from flask import Flask, request, jsonify, send_file
+import json
 
 from translator_service import translate_text, translate_emergency_response, get_installed_languages
 
 app = Flask(__name__)
 CORS(app)  # allow Flutter app to make requests from any origin
-
+app.config['JSON_AS_ASCII'] = False  # ← ADD THIS LINE
+app.json.ensure_ascii = False   # Flask 2.x way
 
 @app.route('/', methods=['GET'])
 def home():

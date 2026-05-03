@@ -39,6 +39,18 @@ def create_tables():
             instructions    TEXT NOT NULL,
             language        TEXT NOT NULL DEFAULT 'en'
         );
+        
+        CREATE TABLE IF NOT EXISTS disaster_prone_areas (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            area_name       TEXT NOT NULL,
+            district        TEXT NOT NULL,
+            state           TEXT NOT NULL,
+            disaster_type   TEXT NOT NULL,
+            risk_level      TEXT NOT NULL,
+            reason          TEXT,
+            safe_zones      TEXT,
+            language        TEXT NOT NULL DEFAULT 'en'
+        );
     ''')
 
     conn.commit()
@@ -77,6 +89,47 @@ def get_evacuation(disaster_type: str, language: str = 'en'):
     rows = cursor.execute(
         'SELECT * FROM evacuation_routes WHERE disaster_type = ? AND language = ?',
         (disaster_type, language)
+    ).fetchall()
+    conn.close()
+    return [dict(row) for row in rows]
+
+def get_disaster_prone_areas(disaster_type: str = '', state: str = '', language: str = 'en'):
+    """Returns disaster prone areas filtered by type and state."""
+    conn   = get_connection()
+    cursor = conn.cursor()
+
+    if disaster_type and state:
+        rows = cursor.execute(
+            'SELECT * FROM disaster_prone_areas WHERE disaster_type = ? '
+            'AND state LIKE ? AND language = ?',
+            (disaster_type, f'%{state}%', language)
+        ).fetchall()
+    elif disaster_type:
+        rows = cursor.execute(
+            'SELECT * FROM disaster_prone_areas WHERE disaster_type = ? AND language = ?',
+            (disaster_type, language)
+        ).fetchall()
+    elif state:
+        rows = cursor.execute(
+            'SELECT * FROM disaster_prone_areas WHERE state LIKE ? AND language = ?',
+            (f'%{state}%', language)
+        ).fetchall()
+    else:
+        rows = cursor.execute(
+            'SELECT * FROM disaster_prone_areas WHERE language = ?',
+            (language,)
+        ).fetchall()
+
+    conn.close()
+    return [dict(row) for row in rows]
+
+def get_high_risk_areas(language: str = 'en'):
+    """Returns only high risk areas."""
+    conn   = get_connection()
+    cursor = conn.cursor()
+    rows   = cursor.execute(
+        'SELECT * FROM disaster_prone_areas WHERE risk_level = ? AND language = ?',
+        ('HIGH', language)
     ).fetchall()
     conn.close()
     return [dict(row) for row in rows]

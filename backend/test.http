@@ -175,3 +175,45 @@ Content-Type: application/json
   "lang": "ml",
   "city": "Solapur"
 }
+
+
+### Translate English to Kannada
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Apply pressure to stop the bleeding.",
+  "from": "en",
+  "to": "kn"
+}
+
+### Ask in Kannada
+POST http://127.0.0.1:5000/ask_translated
+Content-Type: application/json
+
+{
+  "query": "ರಕ್ತಸ್ರಾವ ನಿಲ್ಲಿಸುವುದು ಹೇಗೆ",
+  "mode": "medical",
+  "lang": "kn",
+  "city": "Solapur"
+}
+
+### Should use hardcoded — instant and accurate
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "choking",
+  "from": "en",
+  "to": "ta"
+}
+
+### Should use hardcoded partial match
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Go to hospital immediately",
+  "from": "en",
+  "to": "kn"
+}
