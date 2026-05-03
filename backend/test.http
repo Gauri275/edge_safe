@@ -1,0 +1,219 @@
+### 1. Home - Check all routes
+GET http://localhost:5000/
+
+###
+
+### 2. Health check (Ollama + server status)
+GET http://localhost:5000/health
+
+###
+
+### 3. First aid search (English)
+GET http://localhost:5000/firstaid?q=choking&lang=en
+
+###
+
+### 4. First aid search (Hindi)
+GET http://localhost:5000/firstaid?q=choking&lang=hi
+
+###
+
+### 5. Get shelters by city
+GET http://localhost:5000/shelters?city=Solapur
+
+###
+
+### 6. Evacuation instructions (English)
+GET http://localhost:5000/evacuation?type=flood&lang=en
+
+###
+
+### 7. Evacuation instructions (Hindi)
+GET http://localhost:5000/evacuation?type=flood&lang=hi
+
+###
+
+### 8. Main emergency query (DB + AI fallback)
+POST http://localhost:5000/ask
+Content-Type: application/json
+
+{
+  "query": "someone is choking",
+  "mode": "medical",
+  "lang": "en",
+  "city": "Solapur"
+}
+
+###
+
+### 9. Main emergency query (flood mode)
+POST http://localhost:5000/ask
+Content-Type: application/json
+
+{
+  "query": "flood evacuation",
+  "mode": "flood",
+  "lang": "en",
+  "city": "Solapur"
+}
+
+###
+
+### 10. Direct AI query only (bypass DB)
+POST http://localhost:5000/ai
+Content-Type: application/json
+
+{
+  "query": "how to treat a burn injury",
+  "mode": "medical"
+}
+
+###
+
+### 13. Translate English to Hindi
+POST http://localhost:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Apply pressure to the wound immediately",
+  "from": "en",
+  "to": "hi"
+}
+
+###
+
+### 14. Translate English to Malayalam
+POST http://localhost:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Move to higher ground immediately",
+  "from": "en",
+  "to": "ml"
+}
+
+###
+
+### 15. Translate English to Marathi
+POST http://localhost:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Call emergency services immediately",
+  "from": "en",
+  "to": "mr"
+}
+
+###
+
+### 16. Ask with auto-translation (query in Hindi, response in Hindi)
+POST http://localhost:5000/ask_translated
+Content-Type: application/json
+
+{
+  "query": "कोई दम घुट रहा है",
+  "mode": "medical",
+  "lang": "hi",
+  "city": "Solapur"
+}
+
+###
+
+### 17. Ask with auto-translation (English query, Malayalam response)
+POST http://localhost:5000/ask_translated
+Content-Type: application/json
+
+{
+  "query": "someone is choking",
+  "mode": "medical",
+  "lang": "ml",
+  "city": "Solapur"
+}
+
+###
+
+### Question NOT in database — Ollama handles it
+POST http://127.0.0.1:5000/ask
+Content-Type: application/json
+
+{
+  "query": "what to do during a tsunami",
+  "mode": "general",
+  "lang": "en",
+  "city": "Solapur"
+}
+
+###
+POST http://127.0.0.1:5000/ask
+Content-Type: application/json
+
+{
+  "query": "there is a gas leak in my kitchen",
+  "mode": "general",
+  "lang": "en",
+  "city": "Solapur"
+}
+
+###
+POST http://127.0.0.1:5000/ask
+Content-Type: application/json
+
+{
+  "query": "landslide is happening near my house",
+  "mode": "general",
+  "lang": "en",
+  "city": "Solapur"
+}
+
+###
+POST http://127.0.0.1:5000/ask
+Content-Type: application/json
+
+{
+  "query": "ഒരു ഭൂകമ്പം സംഭവിക്കുന്നു",
+  "mode": "earthquake",
+  "lang": "ml",
+  "city": "Solapur"
+}
+
+
+### Translate English to Kannada
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Apply pressure to stop the bleeding.",
+  "from": "en",
+  "to": "kn"
+}
+
+### Ask in Kannada
+POST http://127.0.0.1:5000/ask_translated
+Content-Type: application/json
+
+{
+  "query": "ರಕ್ತಸ್ರಾವ ನಿಲ್ಲಿಸುವುದು ಹೇಗೆ",
+  "mode": "medical",
+  "lang": "kn",
+  "city": "Solapur"
+}
+
+### Should use hardcoded — instant and accurate
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "choking",
+  "from": "en",
+  "to": "ta"
+}
+
+### Should use hardcoded partial match
+POST http://127.0.0.1:5000/translate
+Content-Type: application/json
+
+{
+  "text": "Go to hospital immediately",
+  "from": "en",
+  "to": "kn"
+}
