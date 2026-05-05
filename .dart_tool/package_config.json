@@ -15,7 +15,7 @@
     },
     {
       "name": "async",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/async-2.13.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/async-2.13.1",
       "packageUri": "lib/",
       "languageVersion": "3.4"
     },
@@ -57,9 +57,9 @@
     },
     {
       "name": "cupertino_icons",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.8",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/cupertino_icons-1.0.9",
       "packageUri": "lib/",
-      "languageVersion": "3.1"
+      "languageVersion": "3.9"
     },
     {
       "name": "dart_earcut",
@@ -153,9 +153,9 @@
     },
     {
       "name": "json_annotation",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/json_annotation-4.9.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/json_annotation-4.11.0",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.9"
     },
     {
       "name": "latlong2",
@@ -303,21 +303,21 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences-2.5.3",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences-2.5.5",
       "packageUri": "lib/",
-      "languageVersion": "3.5"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_android",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.13",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_android-2.4.23",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_foundation",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.4",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_foundation-2.5.6",
       "packageUri": "lib/",
-      "languageVersion": "3.4"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_linux",
@@ -327,9 +327,9 @@
     },
     {
       "name": "shared_preferences_platform_interface",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.1",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/shared_preferences_platform_interface-2.4.2",
       "packageUri": "lib/",
-      "languageVersion": "3.2"
+      "languageVersion": "3.9"
     },
     {
       "name": "shared_preferences_web",
@@ -351,7 +351,7 @@
     },
     {
       "name": "source_span",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/source_span-1.10.1",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/source_span-1.10.2",
       "packageUri": "lib/",
       "languageVersion": "3.1"
     },
@@ -375,21 +375,21 @@
     },
     {
       "name": "sqflite",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite-2.4.2",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite-2.4.2+1",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.10"
     },
     {
       "name": "sqflite_android",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite_android-2.4.1",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite_android-2.4.2+3",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.10"
     },
     {
       "name": "sqflite_common",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite_common-2.5.6",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/sqflite_common-2.5.6+1",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.10"
     },
     {
       "name": "sqflite_darwin",
@@ -423,9 +423,9 @@
     },
     {
       "name": "synchronized",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/synchronized-3.4.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/synchronized-3.4.0+1",
       "packageUri": "lib/",
-      "languageVersion": "3.8"
+      "languageVersion": "3.11"
     },
     {
       "name": "term_glyph",
@@ -459,9 +459,9 @@
     },
     {
       "name": "vm_service",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/vm_service-15.0.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/vm_service-15.2.0",
       "packageUri": "lib/",
-      "languageVersion": "3.3"
+      "languageVersion": "3.5"
     },
     {
       "name": "web",
@@ -477,21 +477,21 @@
     },
     {
       "name": "webview_flutter_android",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_android-4.10.1",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_android-4.12.0",
       "packageUri": "lib/",
-      "languageVersion": "3.7"
+      "languageVersion": "3.9"
     },
     {
       "name": "webview_flutter_platform_interface",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.14.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_platform_interface-2.15.1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.9"
     },
     {
       "name": "webview_flutter_wkwebview",
-      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.23.0",
+      "rootUri": "file:///Users/cibilbaiju/.pub-cache/hosted/pub.dev/webview_flutter_wkwebview-3.25.1",
       "packageUri": "lib/",
-      "languageVersion": "3.6"
+      "languageVersion": "3.10"
     },
     {
       "name": "wkt_parser",
