@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import '../services/tts_service.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -34,12 +35,10 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   Future<void> _getAnswer() async {
-    await Future.delayed(const Duration(seconds: 2));
+    final result = await ApiService.getAnswer(widget.query, widget.mode);
     setState(() {
       _isLoading = false;
-      _answer = widget.mode == 'AI'
-          ? 'AI Answer: During an earthquake, drop to your hands and knees, take cover under a sturdy desk or table, and hold on until the shaking stops. Stay away from windows and exterior walls.'
-          : 'DB Answer: Standard emergency protocol - Drop, Cover, Hold On. Move away from windows. If outdoors, move to open area away from buildings.';
+      _answer = result['answer'] ?? 'No answer received from server.';
     });
   }
 
